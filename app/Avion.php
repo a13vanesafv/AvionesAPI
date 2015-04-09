@@ -23,6 +23,16 @@ class Avion extends Model {
 	protected $hidden=['created_at', 'updated_at'];
 
 
+	//Relacion dde Aviones con Fabricante
+
+	public function Fabricante()
+	{
+		//1 avion pertenece a 1 fabricante
+
+		return $this->belongsTo('\app\Fabricante');
+
+	}
+
 
 
 }
