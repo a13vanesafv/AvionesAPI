@@ -11,11 +11,30 @@
 |
 */
 
-Route::get('/', 'WelcomeController@index');
+//Route::get('/', 'WelcomeController@index');
 
-Route::get('home', 'HomeController@index');
+//Route::get('home', 'HomeController@index');
+
+/*
 
 Route::controllers([
 	'auth' => 'Auth\AuthController',
 	'password' => 'Auth\PasswordController',
 ]);
+
+*/
+
+	//CREAMOS LAS RUTAS NUEVAS QUE TENDRAN EN CUENTA LOS CONTROLLERS PROGRAMADOS EN CONTROLLERS
+
+
+
+	Route::resource('fabricantes', 'FabricanteController', ['except'=>['create']]);
+
+	Route::resource('aviones', 'AvionController');
+
+	//Ruta por Defecto
+
+	Route::get('/', function()
+	{
+		return "Bienvenido a API RESTfull de Aviones";
+	});

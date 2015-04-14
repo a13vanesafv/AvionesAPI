@@ -26,8 +26,8 @@ class FabricanteSeeder extends Seeder {
 
 		for($i=0; $i<5; $i++)
 		{
-				//Cuando llamamos al metodo create del modelo fabricnate
-				// se esta creando nueva fila en la tabla de fabricnates
+				//Cuando llamamos al metodo create del modelo fabricante
+				// se esta creando nueva fila en la tabla de fabricantes
 
 			Fabricante::create(
 				[

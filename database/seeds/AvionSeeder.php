@@ -24,7 +24,7 @@ class AvionSeeder extends Seeder {
 		$faker=Faker::create();
 
 		//NECESITAMOS SABER CUANTOS FABRICANTES TENEMOS
-		//HACEMOS USO MODELO FABRICANTES PARA ELLO
+		//HACEMOS USO MODELO FABRICANTES PARA ELLO, vanesa
 
 		$cuantos=Fabricante::all()->count(); //da JSON CON TODOS LOS FABRICANTES
 
@@ -33,7 +33,7 @@ class AvionSeeder extends Seeder {
 		{
 			Avion::create(
 				[
-				'modelo'=>$faker->word(),
+				'modelo'=>$faker->word() ,
 				'longitud'=>$faker->randomfloat(),
 				'capacidad'=>$faker->randomNumber(),
 				'velocidad'=>$faker->randomNumber(),
@@ -41,7 +41,5 @@ class AvionSeeder extends Seeder {
 				'fabricante_id'=>$faker->numberBetween(1, $cuantos)
 				]);
 		}
-
-
 	}
 }
