@@ -98,10 +98,10 @@ class FabricanteController extends Controller {
 	 * @param  int  $id
 	 * @return Response
 	 */
-	public function edit($id)
-	{
+	//public function edit($id)
+	//{
 		//
-	}
+	//}
 
 	/**
 	 * Update the specified resource in storage.
@@ -122,6 +122,29 @@ class FabricanteController extends Controller {
 	 */
 	public function destroy($id)
 	{
+		//Borrado de un fabricante
+		//Ejemplo: Fabricante /89 por DELETE
+		//Comprobamos si el fabricante existe o no
+
+		$fabricante=Fabricante::find($id);
+
+		//Si no encontramos el fabricante
+
+		if(! $fabricante)
+		{
+			//Devolcemos error codigo http 404
+			return response()->json(['errors'=>array(['code'=>404, 'message'=>'no se encuentra el fabricante'])],404);
+		}
+
+		//Borramos el fabricante
+		//204 significa n "No content"
+		//Este codigo no muestra texto en el body
+		//Si quisieramos ver el mensaje devolveriamos
+		//un codigo 200
+
+		$fabricante->delete();
+
+		return response()->json(['errors'=>array(['code'=>204, 'message'=>'se ha eliminado correctamente'])],204);
 
 	}
 
