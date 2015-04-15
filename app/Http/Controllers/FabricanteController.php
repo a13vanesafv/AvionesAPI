@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 //Carganmos fabricante pq los usamos más abajo
 
 use App\Fabricante;
+use Response;
 
 class FabricanteController extends Controller {
 
@@ -47,9 +48,26 @@ class FabricanteController extends Controller {
 	 *
 	 * @return Response
 	 */
-	public function store()
+	public function store(Request $request)
 	{
-		//
+		//Metodo llamada el hacer un POST
+		//Comprobamos que recibimos todos los campos
+
+		if(!$request->input('nombre') || !$request->input('direccion') || !$request->inpùt('telefono'))
+		{
+			//No estamos recibiendo los datos necesarios. Devuelvo error
+			return response()->json(['errors'=>array(['code'=>422, 'message'=>'faltan datos necesarios para el alta'])],422);
+
+		}
+		//Insertamos los datos recibidos en la tabla
+
+		$nuevofabricante=Fabricante::create($request->all());
+
+		//Devovlemos la respuesta Http 201 (Created) +  los datos del nuevo fabricantes + una cabecera de Loacation
+
+		$respuesta=Response::make(json_encode(['data'=>$nuevofabricante]), 201)->header('Location', 'http://www.dominio.local/fabricantes/'.$nuevofabricante->id)->header('Content-Type', 'application/json');
+		return $respuesta;
+
 	}
 
 	/**
@@ -63,8 +81,7 @@ class FabricanteController extends Controller {
 	//Corresponde a la ruta /fabricantes/{fabricante}
 	$fabricante=Fabricante::find($id);
 
-
-	//Chequeamos si encontro o nbo el fabricante
+	//Chequeamos si encontro o no el fabricante
 
 	if(! $fabricante)
 	{
@@ -105,7 +122,7 @@ class FabricanteController extends Controller {
 	 */
 	public function destroy($id)
 	{
-		//
+
 	}
 
 }
