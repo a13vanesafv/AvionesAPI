@@ -42,32 +42,27 @@ class FabricanteAvionController extends Controller {
 	 *
 	 * @return Response
 	 */
-	public function store($idfabricante, Request $request)
+	public function store($idFabricante,Request $request)
 	{
-		//DAMOS DE ALTA 1 AVION DE 1 FABRICANTE
-		//COMPROBAMOS QUE EXISTE FABRICANTE Y Q ETENEMOS TODOS LOS DATOS DE AVION
-		$fabricante=Fabricante::find($idfabricante);
-
+		// Damos de alta un avión de un fabricante.
+		// Comprobamos que recibimos todos los datos de avión.
+		if (! $request->input('modelo') || ! $request->input('longitud') ||! $request->input('capacidad') ||! $request->input('velocidad') ||! $request->input('alcance') )
+		{
+			// Error 422 Unprocessable Entity.
+			return response()->json(['errors'=>array(['code'=>422,'message'=>'Faltan datos necesarios para el alta de avión.'])],422);
+		}
+		// Compruebo si existe el fabricante.
+		$fabricante=Fabricante::find($idFabricante);
 		if (! $fabricante)
 		{
-			return response()->json(['errors'=>Array(['code'=>404,'message'=>'No se encuentra un fabricante con ese código.'])], 404);
+			return response()->json(['errors'=>array(['code'=>404,'message'=>'No se encuentra un fabricante con ese código.'])],404);
 		}
-
-		if(!$request->input('modelo') || !$request->input('longitud') || !$request->input('capacidad') || !$request->input('velocidad') ||  !$request->input('alcance'));
-		{
-			//No estamos recibiendo los datos necesarios. Devuelvo error
-			return response()->json(['errors'=>array(['code'=>422, 'message'=>'faltan datos necesarios para el alta'])],422);
-
-		}
-
-
-		//damos de alta el avion de ese fabricante
-		$nuevoAvion=$fabricante->aviones()->create($request)->all();	
-
-		//devolvemos un Json con los datos , código 201 y Location del nuevo recurso creado
-$respuesta=Response::make(json_encode(['data'=>$nuevoAvion]), 201)->header('Location', 'http://www.dominio.local/aviones/'.$nuevoAvion->serie)->header('Content-Type', 'application/json');
-
-}
+		// Damos de alta el avión de ese fabricante.
+		$nuevoAvion=$fabricante->aviones()->create($request->all());
+		// Devolvemos un JSON con los datos, código 201 Created y Location del nuevo recurso creado.
+		$respuesta= Response::make(json_encode(['data'=>$nuevoAvion]),201)->header('Location','http://www.dominio.local/aviones/'.$nuevoAvion->serie)->header('Content-Type','application/json');
+		return $respuesta;
+	}
 
 
 	/**
@@ -76,9 +71,103 @@ $respuesta=Response::make(json_encode(['data'=>$nuevoAvion]), 201)->header('Loca
 	 * @param  int  $id
 	 * @return Response
 	 */
-	public function update($id)
+	public function update($idFabricante, $idAvion, Request $request)
 	{
-		//
+		//Comprobamos si el fabricante 
+		$fabricante=Fabricante::find($idfabricante);
+		if(! $fabricante)
+		{
+			return response()->json(['errors'=>array(['code'=>404,'message'=>'No se encuentra un fabricante con ese código.'])],404);
+		}
+		//Comprobamos si avion q buscamos pertenece a ese fabricante
+		$avion = $fabricante->aviones()->find($idAvion);
+
+		if(! $avion)
+		{
+			return response()->json(['errors'=>array(['code'=>404,'message'=>'No se encuentra un avion con ese código que pertenezca al fabricante.'])],404);
+		}
+
+		//Listado de campos recibidos del formulario de actualizacion
+		$modelo=$request->input('modelo');
+		$longitud=$request->input('longitud');
+		$capacidad=$request->input('capacidad');
+		$velocidad=$request->input('velocidad');
+		$alcance=$request->input('alcance');
+
+
+		//Comprobamos si el método es patch o put
+		if($request->method()==='PATCH') //actualizacion PARCIAL
+		{
+			$bandera=false;
+			//Comprobamos campo a campo, si hemos recibido datos
+			if($modelo !=null && $modelo!='')
+			{
+				//actualizamos este campo en la tabla
+				$avion->modelo=$modelo;
+				$bandera=true;
+			}
+			if($longitud !=null && $longitud!='')
+			{
+				//actualizamos este campo en la tabla
+				$avion->longitud=$longitud;
+				$bandera=true;
+			}
+			if($capacidad !=null && $capacidad!='')
+			{
+				//actualizamos este campo en la tabla
+				$avion->capacidad=$capacidad;
+				$bandera=true;
+			}
+			if($velocidad !=null && $velocidad!='')
+			{
+				//actualizamos este campo en la tabla
+				$avion->velocidad=$velocidad;
+				$bandera=true;
+			}
+			if($alcance !=null && $alcance!='')
+			{
+				//actualizamos este campo en la tabla
+				$avion->alcance=$alcance;
+				$bandera=true;
+			}
+			if ($bandera)
+			{
+				//almacenamos los cambios del modelo en la tabla
+				$avion->save();
+				return response()->json(['status'=>ok, 'data'=>$avion], 200);
+			}
+			else{
+
+				//Codigo 304 Not Modified
+
+				return response()->json(['errors'=>array(['code'=>304,'message'=>'No se encuentra un fabricante con ese código.'])],304);
+			}
+		}
+
+		//METODO PUT- ACTUALIZACION TOTAL
+		//Chqueamos que recibimos todos los campos
+
+		if(! $modelo || ! $longitud. || !$capacidad || !$velocidad || !$alcance)
+		{
+			//Codigo 422 UNprocessable Entity
+			return response()->json(['errors'=>array(['code'=>422,'message'=>'Faltan valores para completar el procesamiento.'])],422);
+
+		}
+
+		//Actualizamos el modelo Avion
+		$avion->modelo=$modelo;
+		$avion->longitud=$longitud;
+		$avion->capacidad=$capacidad;
+		$avion->velocidad=$velocidad;
+		$avion->alcance=$alcance;
+
+		//Grabamos los datos del modelo en la tabla
+		$avion->save();
+
+		return response()->json(['status'=>'ok', 'data'=>$avion],200);
+
+
+
 	}
 
 	/**
@@ -87,9 +176,24 @@ $respuesta=Response::make(json_encode(['data'=>$nuevoAvion]), 201)->header('Loca
 	 * @param  int  $id
 	 * @return Response
 	 */
-	public function destroy($id)
+	public function destroy($idFabricante,$idAvion)
 	{
-		//
+		// Compruebo si existe el fabricante.
+		$fabricante=Fabricante::find($idFabricante);
+		if (! $fabricante)
+		{
+			return response()->json(['errors'=>array(['code'=>404,'message'=>'No se encuentra un fabricante con ese código.'])],404);
+		}
+		// Compruebo si existe el avion.
+		$avion=$fabricante->aviones()->find($idAvion);
+		if (! $avion)
+		{
+			return response()->json(['errors'=>array(['code'=>404,'message'=>'No se encuentra un avión asociado a ese fabricante.'])],404);
+		}
+		// Borramos el avión.
+		$avion->delete();
+		// Devolvemos código 204 No Content.
+		return response()->json(['code'=>204,'message'=>'Se ha eliminado el avión correctamente.'],204);
 	}
 
 }
