@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use App\Fabricante;
 use Response;
 
+//activamo el uso de la s funciones de cache
+use Illuminate\Support\Facades\cache;
+
 class FabricanteController extends Controller {
 
 	/**
@@ -22,11 +25,20 @@ class FabricanteController extends Controller {
 		//return "En el index de Fabricante";
 		//DEVOLVEMOS UN JSON CON TODOS LOS FABRICANTES. Usamos el modelo fabricante
 		//con el use de arriba ya podemos utilizar el modelo fabricante
-
 		//return Fabricante::all();
+		//cache se ACTUALIZARA CON NUEVOS DATOS CADA 15 SEGUNDOS
+
+		$fabricantes=Cache::remember('cachefabricantes', 15/60, function()
+		{
+			return Fabricante::all();
+		});
 
 		//PARA DEVOLVER UN JSON CON CONDIGO DE RESPUESTA HTTP
-		return response()->json(['status'=>'ok', 'data'=>Fabricante::all()], 200);
+		//return response()->json(['status'=>'ok', 'data'=>Fabricante::all()], 200);
+
+		//Devolvemos el Json usando cache
+		return response()->json(['status'=>'ok', 'data'=>$fabricantes], 200);
+
 	}
 
 	/**
@@ -53,7 +65,7 @@ class FabricanteController extends Controller {
 		//Metodo llamada el hacer un POST
 		//Comprobamos que recibimos todos los campos
 
-		if(!$request->input('nombre') || !$request->input('direccion') || !$request->inpùt('telefono'))
+		if(!$request->input('nombre') || !$request->input('direccion') || !$request->input('telefono'))
 		{
 			//No estamos recibiendo los datos necesarios. Devuelvo error
 			return response()->json(['errors'=>array(['code'=>422, 'message'=>'faltan datos necesarios para el alta'])],422);
@@ -127,19 +139,19 @@ class FabricanteController extends Controller {
 			$bandera = false;
 			
 			// Actualización parcial de datos
-			if($nombre!=null && $nombre!='') 
+			if($nombre) 
 			{
 				$fabricante->nombre = $nombre;
 				$bandera = true;
 			}
 			
-			if($direccion!=null && $direccion!='') 
+			if($direccion) 
 			{
 				$fabricante->direccion = $direccion;
 				$direccion = true;
 			}
 			
-			if($telefono!=null && $telefono!='') 
+			if($telefono) 
 			{
 				$fabricante->telefono = $telefono;
 				$bandera = true;
@@ -209,7 +221,7 @@ class FabricanteController extends Controller {
 			//Si quisiéramos borrar todos los aviones del fabricante sería:
 			//$fabricante->aviones->delete();
 
-			
+
 			//Devolvemos un código 409 Conflict
 			return response()->json(['errors'=>array(['code' => 409, 'message'=>'Este fabricante posee aviones y no puede ser eliminado'])], 409);
 		}

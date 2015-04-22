@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Fabricante;
 use App\Avion;
 use Response;
+use Illuminate\Support\Facades\cache;
 
 
 class FabricanteAvionController extends Controller {
@@ -30,9 +31,18 @@ class FabricanteAvionController extends Controller {
 			return response()->json(['errors'=>Array(['code'=>404,'message'=>'No se encuentra un fabricante con ese código.'])], 404);
 		}
 
-		return response()->json(['status'=>'ok', 'data'=>$fabricante->aviones()->get()], 200); //metodo aviones de Fabricante
+
+		$listaAviones=Cache::remember('cacheaviones', 1, , function()
+		{
+			return $fabricante->aviones->get();
+
+		});
+
+
+		return response()->json(['status'=>'ok', 'data'=>$listaAviones], 200); //metodo aviones de Fabricante
 
 		//return response()->json('status'=>'ok', 'data'=>$fabricante->aviones], 200); //metodo 
+
 
 	}
 
@@ -74,7 +84,7 @@ class FabricanteAvionController extends Controller {
 	public function update($idFabricante, $idAvion, Request $request)
 	{
 		//Comprobamos si el fabricante 
-		$fabricante=Fabricante::find($idfabricante);
+		$fabricante=Fabricante::find($idFabricante);
 		if(! $fabricante)
 		{
 			return response()->json(['errors'=>array(['code'=>404,'message'=>'No se encuentra un fabricante con ese código.'])],404);
@@ -100,31 +110,31 @@ class FabricanteAvionController extends Controller {
 		{
 			$bandera=false;
 			//Comprobamos campo a campo, si hemos recibido datos
-			if($modelo !=null && $modelo!='')
+			if($modelo)
 			{
 				//actualizamos este campo en la tabla
 				$avion->modelo=$modelo;
 				$bandera=true;
 			}
-			if($longitud !=null && $longitud!='')
+			if($longitud)
 			{
 				//actualizamos este campo en la tabla
 				$avion->longitud=$longitud;
 				$bandera=true;
 			}
-			if($capacidad !=null && $capacidad!='')
+			if($capacidad)
 			{
 				//actualizamos este campo en la tabla
 				$avion->capacidad=$capacidad;
 				$bandera=true;
 			}
-			if($velocidad !=null && $velocidad!='')
+			if($velocidad)
 			{
 				//actualizamos este campo en la tabla
 				$avion->velocidad=$velocidad;
 				$bandera=true;
 			}
-			if($alcance !=null && $alcance!='')
+			if($alcance)
 			{
 				//actualizamos este campo en la tabla
 				$avion->alcance=$alcance;
@@ -147,7 +157,7 @@ class FabricanteAvionController extends Controller {
 		//METODO PUT- ACTUALIZACION TOTAL
 		//Chqueamos que recibimos todos los campos
 
-		if(! $modelo || ! $longitud. || !$capacidad || !$velocidad || !$alcance)
+		if(! $modelo || ! $longitud || !$capacidad || !$velocidad || !$alcance)
 		{
 			//Codigo 422 UNprocessable Entity
 			return response()->json(['errors'=>array(['code'=>422,'message'=>'Faltan valores para completar el procesamiento.'])],422);

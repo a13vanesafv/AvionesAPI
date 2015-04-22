@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 use App\Avion;
+use Illuminate\Support\Facades\cache;
 
 class AvionController extends Controller {
 
@@ -16,7 +17,13 @@ class AvionController extends Controller {
 	public function index()
 	{
 		//Devuelve la lista de todos los aviones
-		return response()->json(['status'=>'ok', 'data'=>Avion::all()], 200);
+		$listaAviones=Cache::remember('cacheTodosAviones', 5, , function()
+		{
+			return Avion::all();
+
+		});
+
+		return response()->json(['status'=>'ok', 'data'=>$listaAviones], 200);
 
 	}
 
@@ -33,10 +40,10 @@ class AvionController extends Controller {
 		$avion=Avion::find($id);
 
 		if(! $avion)
-			{
-				return response()->json(['errors'=>['code'=>404, 'message'=>'no se encuentra avion con ese codigo']], 404);
-			}
-			return response()->json(['status'=>'ok', 'data'=>$avion], 200);
+		{
+			return response()->json(['errors'=>['code'=>404, 'message'=>'no se encuentra avion con ese codigo']], 404);
+		}
+		return response()->json(['status'=>'ok', 'data'=>$avion], 200);
 
 	}
 
