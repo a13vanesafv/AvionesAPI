@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\cache;
 
 class FabricanteController extends Controller {
 
+	public function __construct()
+	{
+		$this->middleware('auth.basic',['only'=>['store', 'update', 'destroy']]);
+	}
+
 	/**
 	 * PROGRAMAMOS LA RUTA POR DEFECTO /FABRICANTES.
 	 *

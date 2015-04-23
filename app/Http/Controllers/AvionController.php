@@ -17,7 +17,7 @@ class AvionController extends Controller {
 	public function index()
 	{
 		//Devuelve la lista de todos los aviones
-		$listaAviones=Cache::remember('cacheTodosAviones', 5, , function()
+		$listaAviones=Cache::remember('cacheTodosAviones', 5, function()
 		{
 			return Avion::all();
 
